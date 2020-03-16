@@ -22,6 +22,7 @@ public class TicTacToe {
 	private JComboBox gameModes;
 	
 	private static String[][] gameBoard = { {"", "", ""}, {"", "", ""}, {"", "", ""} };
+	private static JLabelBox[][] gameBoardBoxes = { {B1, B2, B3}, {B4, B5, B6}, {B7, B8, B9} };
 	private String currentGameMode = "PP"; // PP = Player vs Player; PB = Player vs Bot, BB = Bot vs Bot
 	private static String currentMove = "X";
 	private static int xWins = 0;
@@ -180,13 +181,23 @@ public class TicTacToe {
 		player2wins.setForeground(Color.BLACK);
 		player2wins.setFont(new Font("Roboto", Font.BOLD, 30));
 		panel.add(player2wins);
+		
+		gameBoardBoxes[0][0] = B1;
+		gameBoardBoxes[0][1] = B2;
+		gameBoardBoxes[0][2] = B3;
+		gameBoardBoxes[1][0] = B4;
+		gameBoardBoxes[1][1] = B5;
+		gameBoardBoxes[1][2] = B6;
+		gameBoardBoxes[2][0] = B7;
+		gameBoardBoxes[2][1] = B8;
+		gameBoardBoxes[2][2] = B9;
 
 		frame.setVisible(true);
 		
 	}
 	
 	/**
-	 * Checks to see if there is a winner, and if there is, show where visually
+	 * Checks to see if there is a winner
 	 * @return Whether a winner exists
 	 */
 	public static boolean checkWinner() {
@@ -208,12 +219,36 @@ public class TicTacToe {
 	}
 	
 	/**
+	 * Lights up the boxes to make the winner more easily shown
+	 */
+	public static void showWinner() {
+		// Update horizontal
+		for (int i = 0; i < gameBoard.length; i++)
+			if (gameBoard[i][0].equals(gameBoard[i][1]) && gameBoard[i][1].equals(gameBoard[i][2]) && gameBoard[i][0].length() > 0)
+				for (int z = 0; z <= 2; z++)
+					gameBoardBoxes[i][z].setBackground(Color.GRAY);
+		// Update vertical
+		for (int i = 0; i < gameBoard.length; i++)
+			if (gameBoard[0][i].equals(gameBoard[1][i]) && gameBoard[1][i].equals(gameBoard[2][i]) && gameBoard[0][i].length() > 0)
+				for (int z = 0; z <= 2; z++)
+					gameBoardBoxes[z][i].setBackground(Color.GRAY);
+		// Update diagonal
+		if (gameBoard[0][0].equals(gameBoard[1][1]) && gameBoard[1][1].equals(gameBoard[2][2]) && gameBoard[0][0].length() > 0)
+			for (int i = 0; i <= 2; i++)
+				gameBoardBoxes[i][i].setBackground(Color.GRAY);
+		if (gameBoard[0][2].equals(gameBoard[1][1]) && gameBoard[1][1].equals(gameBoard[2][0]) && gameBoard[0][2].length() > 0)
+			for (int i = 0; i <= 2; i++)
+				gameBoardBoxes[i][2-i].setBackground(Color.GRAY);
+	}
+	
+	/**
 	 * Updates the message below and the status of the game
 	 */
 	public static void updateMessage() { 
 		if (checkWinner()) {
 			message.setText(currentMove + " Wins!");
 			updateCounter(currentMove);
+			showWinner();
 			disableBoard();
 		}
 		else if (isBoardFull())
@@ -267,18 +302,12 @@ public class TicTacToe {
 	 * Clears the board
 	 */
 	public static void clearBoard() {
-		B1.setText("");
-		B2.setText("");
-		B3.setText("");
-		B4.setText("");
-		B5.setText("");
-		B6.setText("");
-		B7.setText("");
-		B8.setText("");
-		B9.setText("");
 		for (int i = 0; i <= 2; i++)
-			for (int z = 0; z <= 2; z++)
+			for (int z = 0; z <= 2; z++) {
 				gameBoard[i][z] = "";
+				gameBoardBoxes[i][z].setText("");
+				gameBoardBoxes[i][z].setBackground(Color.WHITE);
+			}
 		updateMessage();
 	}
 	
