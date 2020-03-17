@@ -16,17 +16,20 @@ public class TicTacToe {
 	private JPanel panel;
 	private static JLabelBox B1, B2, B3, B4, B5, B6, B7, B8, B9; // The game board
 	private static JLabel message;
-	private JLabel gamemodeLabel;
-	private static JLabel player1wins, player2wins;
+	private JLabel gameModesLabel;
+	private static JLabel player1wins, player2wins, gamesPlayed;
 	private JButton clearBoard, clearWins;
 	private JComboBox gameModes;
 	
 	private static String[][] gameBoard = { {"", "", ""}, {"", "", ""}, {"", "", ""} };
 	private static JLabelBox[][] gameBoardBoxes = { {B1, B2, B3}, {B4, B5, B6}, {B7, B8, B9} };
-	private String currentGameMode = "PP"; // PP = Player vs Player; PB = Player vs Bot, BB = Bot vs Bot
+	private static String[] availableGameModes = {"Player vs Player", "Player vs Bot", "Bot vs Bot"};
+	private static String currentGameMode = "Player vs Player";
 	private static String currentMove = "X";
+	private static String playerMove = "XO"; // This is here so the bot knows whether X or O is theirs, in Bot vs Bot this will be empty
 	private static int xWins = 0;
 	private static int oWins = 0;
+	private static int gamesCount = 0;
 	
 	public TicTacToe() {
 
@@ -171,16 +174,36 @@ public class TicTacToe {
 		panel.add(clearWins);
 		
 		player1wins = new JLabel("X wins : " + xWins);
-		player1wins.setBounds(520, 60, 250, 30);
+		player1wins.setBounds(520, 40, 250, 30);
 		player1wins.setForeground(Color.BLACK);
 		player1wins.setFont(new Font("Roboto", Font.BOLD, 30));
 		panel.add(player1wins);
 		
 		player2wins = new JLabel("O wins : " + oWins);
-		player2wins.setBounds(520, 170, 250, 30);
+		player2wins.setBounds(520, 130, 250, 30);
 		player2wins.setForeground(Color.BLACK);
 		player2wins.setFont(new Font("Roboto", Font.BOLD, 30));
 		panel.add(player2wins);
+		
+		gamesPlayed = new JLabel("Games played : " + gamesCount);
+		gamesPlayed.setBounds(520, 220, 300, 30);
+		gamesPlayed.setForeground(Color.BLACK);
+		gamesPlayed.setFont(new Font("Roboto", Font.BOLD, 30));
+		panel.add(gamesPlayed);
+		
+		gameModes = new JComboBox(availableGameModes);
+		gameModes.setSelectedIndex(0);
+		gameModes.setBounds(630, 280, 150, 30);
+		gameModes.setFont(new Font("Roboto", Font.BOLD, 15));
+		gameModes.setForeground(Color.BLACK);
+		gameModes.addActionListener(new ButtonListener());
+		panel.add(gameModes);
+		
+		gameModesLabel = new JLabel("Gamemodes : ");
+		gameModesLabel.setBounds(520, 280, 150, 30);
+		gameModesLabel.setFont(new Font("Roboto", Font.BOLD, 15));
+		gameModesLabel.setForeground(Color.BLACK);
+		panel.add(gameModesLabel);
 		
 		gameBoardBoxes[0][0] = B1;
 		gameBoardBoxes[0][1] = B2;
@@ -251,8 +274,10 @@ public class TicTacToe {
 			showWinner();
 			disableBoard();
 		}
-		else if (isBoardFull())
+		else if (isBoardFull()) {
 			message.setText("It's a Draw!");
+			updateCounter("Draw");
+		}
 		else {
 			if (currentMove.equals("X"))
 				currentMove = "O";
@@ -270,11 +295,12 @@ public class TicTacToe {
 			xWins++;
 			player1wins.setText("X wins : " + xWins);
 		}
-		else {
+		else if (winner.equals("O")) {
 			oWins++;
 			player2wins.setText("O wins : " + oWins);
 		}
-			
+		gamesCount++;
+		gamesPlayed.setText("Games played : " + gamesCount);
 	}
 	
 	/**
@@ -317,26 +343,90 @@ public class TicTacToe {
 	public static void clearCounters() {
 		xWins = 0;
 		oWins = 0;
+		gamesCount = 0;
 		player1wins.setText("X wins : " + xWins);
 		player2wins.setText("O wins : " + oWins);
+		gamesPlayed.setText("Games played : " + gamesCount);
 	}
+	
+	/**
+	 * Updates the gamemode
+	 */
+	public static void updateGamemode(String gamemode) {
+		if (gamemode != currentGameMode) {
+			clearCounters();
+			clearBoard();
+			currentGameMode = gamemode;
+			if (currentGameMode.equals("Player vs Player"))
+				playerMove = "XO";
+			else if (currentGameMode.equals("Player vs Bot"))
+				playerMove = "X";
+			else {
+				playerMove = "";
+				botVsBot();
+			}
+		}
+	}
+	
+	/**
+	 * Bot move
+	 */
+	public static void botTurn() {
+		if (playerMove.indexOf(currentMove) == -1) {
+			boolean emptyBoxFound = false;
+			while (!emptyBoxFound) {
+				int randomRow = (int)(Math.random() * gameBoard.length);
+				int randomCol = (int)(Math.random() * gameBoard.length);
+				if (gameBoard[randomRow][randomCol].equals("")) {
+					gameBoard[randomRow][randomCol] = currentMove;
+					gameBoardBoxes[randomRow][randomCol].setText(currentMove);
+					emptyBoxFound = true;
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Bot vs Bot
+	 */
+	public static void botVsBot() {
+		while (!checkWinner() && !isBoardFull()) {
+			botTurn();
+			updateMessage();
+		}
+	}
+	
+	/*
+	 * For testing errors
+	public static void printBoard() {
+		for (String[] row : gameBoard)
+			for (String item : row)
+				System.out.print(item + " ");
+		System.out.println();
+	}
+	*/
 	
 	private class ButtonListener implements ActionListener {
 
 		@Override
 		public void actionPerformed(ActionEvent event) {
-			if (event.getSource() == clearBoard)
+			if (event.getSource() == clearBoard) {
 				clearBoard();
-			if (event.getSource() == clearWins)
+				if (currentGameMode.equals("Bot vs Bot"))
+						botVsBot();
+			}
+			else if (event.getSource() == clearWins)
 				clearCounters();
+			else if (event.getSource() == gameModes) {
+				String inputType = (String)(((JComboBox)event.getSource()).getSelectedItem());
+				updateGamemode(inputType);
+			}
 		}
 		
 	}
 	
 	/**
 	 * Reacts to when the box is clicked
-	 * @author Roland
-	 *
 	 */
 	private class LabelAdapter extends MouseAdapter {
 		
@@ -358,8 +448,6 @@ public class TicTacToe {
 	
 	/**
 	 * Makes the class for the box
-	 * @author Roland
-	 *
 	 */
 	public class JLabelBox extends JLabel {
 		
