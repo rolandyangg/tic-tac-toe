@@ -283,7 +283,7 @@ public class TicTacToe {
 				currentMove = "O";
 			else
 				currentMove = "X";
-			message.setText("It's " + currentMove + "'s turn.");
+			message.setText("It is " + currentMove + "'s turn.");
 		}
 	}
 	
