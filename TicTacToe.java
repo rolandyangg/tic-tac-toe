@@ -335,6 +335,8 @@ public class TicTacToe {
 				gameBoardBoxes[i][z].setBackground(Color.WHITE);
 			}
 		updateMessage();
+		if (currentGameMode.equals("Player vs Bot") && playerMove.indexOf(currentMove) == -1)
+			botTurn();
 	}
 	
 	/**
@@ -359,8 +361,10 @@ public class TicTacToe {
 			currentGameMode = gamemode;
 			if (currentGameMode.equals("Player vs Player"))
 				playerMove = "XO";
-			else if (currentGameMode.equals("Player vs Bot"))
+			else if (currentGameMode.equals("Player vs Bot")) {
 				playerMove = "X";
+				botTurn();
+			}
 			else {
 				playerMove = "";
 				botVsBot();
@@ -383,6 +387,7 @@ public class TicTacToe {
 					emptyBoxFound = true;
 				}
 			}
+			updateMessage();
 		}
 	}
 	
@@ -392,7 +397,6 @@ public class TicTacToe {
 	public static void botVsBot() {
 		while (!checkWinner() && !isBoardFull()) {
 			botTurn();
-			updateMessage();
 		}
 	}
 	
@@ -441,6 +445,7 @@ public class TicTacToe {
 				sender.setText(currentMove);
 				gameBoard[sender.row][sender.col] = currentMove;
 				updateMessage();
+				botTurn();
 			}
 		}
 		
