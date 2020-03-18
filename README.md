@@ -5,9 +5,7 @@ The simple game of Tic Tac Toe but in Java Swing!
 
 ![github-large](TicTacToeSample31720.gif)
 
-Play the game of Tic Tac Toe against your friend!
-
-
+Play the game of Tic Tac Toe against your friend! A bot! Or put bots against each other!
 
 Future Plans:
 
